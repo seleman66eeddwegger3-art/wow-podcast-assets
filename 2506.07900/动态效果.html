@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniCPM5-1B Dual-Mode Performance Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap');
+        body { font-family: 'Fira Code', monospace; background-color: #09090b; }
+        .cyber-grid {
+            background-image: linear-gradient(to right, rgba(63, 63, 70, 0.1) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(63, 63, 70, 0.1) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .glow-green { filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.5)); }
+        .glow-amber { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5)); }
+    </style>
+</head>
+<body class="cyber-grid min-h-screen text-zinc-100 p-8 flex flex-col justify-between select-none">
+
+    <div class="border-b border-zinc-800 pb-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <span class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
+            <h1 class="text-xl font-bold tracking-wider text-zinc-400">wow.insight // PERFORMANCE BENCHMARK</h1>
+        </div>
+        <div class="text-sm text-zinc-500">TARGET: MiniCPM5-1B (INT4 Quantized)</div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-8 my-auto h-[65vh]">
+        
+        <div class="grid grid-rows-2 gap-4 h-full">
+            <div class="bg-zinc-950/80 border border-zinc-800 rounded-lg p-4 flex flex-col justify-between overflow-hidden relative">
+                <div class="absolute top-2 right-3 text-xs font-bold text-green-500 bg-green-950/50 px-2 py-0.5 rounded border border-green-800/50 glow-green">enable_thinking = False</div>
+                <div class="text-xs text-zinc-600 border-b border-zinc-900 pb-1 mb-2">TERMINAL _01 // FAST_MODE</div>
+                <div id="terminal-no-think" class="text-sm text-zinc-300 leading-relaxed overflow-y-auto h-full space-y-1">
+                    <p class="text-zinc-500">&gt; python run_agent.py --mode fast</p>
+                </div>
+            </div>
+            
+            <div class="bg-zinc-950/80 border border-zinc-800 rounded-lg p-4 flex flex-col justify-between overflow-hidden relative">
+                <div class="absolute top-2 right-3 text-xs font-bold text-amber-500 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/50 glow-amber">enable_thinking = True</div>
+                <div class="text-xs text-zinc-600 border-b border-zinc-900 pb-1 mb-2">TERMINAL _02 // REASONING_MODE</div>
+                <div id="terminal-think" class="text-sm text-zinc-300 leading-relaxed overflow-y-auto h-full space-y-1">
+                    <p class="text-zinc-500">&gt; python run_agent.py --mode reasoning</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-zinc-950/80 border border-zinc-800 rounded-lg p-6 flex flex-col justify-between h-full">
+            <div class="text-xs text-zinc-600 border-b border-zinc-900 pb-2 mb-4">REAL-TIME HARDWARE METRICS MONITOR</div>
+            
+            <div class="flex-1 grid grid-cols-2 gap-8 items-end pb-8">
+                <div class="h-full flex flex-col justify-end space-y-4">
+                    <div class="text-center text-xs text-zinc-500 uppercase font-bold">VRAM Usage (KV Cache Included)</div>
+                    <div class="h-[75%] bg-zinc-900/40 border border-zinc-800 rounded p-4 flex justify-around items-end space-x-4 relative">
+                        <div class="absolute left-2 top-2 text-[10px] text-zinc-700">MAX: 1.50 GB</div>
+                        <div class="w-full flex flex-col items-center h-full justify-end">
+                            <div id="vram-val-no" class="text-xs font-bold text-green-400 mb-2">0.00 GB</div>
+                            <div id="vram-bar-no" class="w-12 bg-green-500/20 border-t-2 border-green-400 rounded-t transition-all duration-300 h-0 glow-green"></div>
+                            <span class="text-[10px] text-zinc-500 mt-2">Fast</span>
+                        </div>
+                        <div class="w-full flex flex-col items-center h-full justify-end">
+                            <div id="vram-val-think" class="text-xs font-bold text-amber-400 mb-2">0.00 GB</div>
+                            <div id="vram-bar-think" class="w-12 bg-amber-500/20 border-t-2 border-amber-400 rounded-t transition-all duration-300 h-0 glow-amber"></div>
+                            <span class="text-[10px] text-zinc-500 mt-2">Think</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-full flex flex-col justify-end space-y-4">
+                    <div class="text-center text-xs text-zinc-500 uppercase font-bold">Total Generation Latency</div>
+                    <div class="h-[75%] bg-zinc-900/40 border border-zinc-800 rounded p-4 flex justify-around items-end space-x-4 relative">
+                        <div class="absolute left-2 top-2 text-[10px] text-zinc-700">MAX: 40.0 s</div>
+                        <div class="w-full flex flex-col items-center h-full justify-end">
+                            <div id="lat-val-no" class="text-xs font-bold text-green-400 mb-2">0.00 s</div>
+                            <div id="lat-bar-no" class="w-12 bg-green-500/20 border-t-2 border-green-400 rounded-t transition-all duration-300 h-0 glow-green"></div>
+                            <span class="text-[10px] text-zinc-500 mt-2">Fast</span>
+                        </div>
+                        <div class="w-full flex flex-col items-center h-full justify-end">
+                            <div id="lat-val-think" class="text-xs font-bold text-amber-400 mb-2">0.00 s</div>
+                            <div id="lat-bar-think" class="w-12 bg-amber-500/20 border-t-2 border-amber-400 rounded-t transition-all duration-300 h-0 glow-amber"></div>
+                            <span class="text-[10px] text-zinc-500 mt-2">Think</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startSimulation()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold tracking-widest rounded transition active:scale-[0.99] cursor-pointer">
+                [ TRIGGER BENCHMARK EMULATION ]
+            </button>
+        </div>
+    </div>
+
+    <div class="border-t border-zinc-900 pt-4 flex justify-between text-xs text-zinc-600">
+        <div>SYS_STATUS: ACTIVE // INTERACTIVE_PROTOTYPE_V2</div>
+        <div>PRESS BUTTON TO START ANIMATION LOOP</div>
+    </div>
+
+    <script>
+        const prompt = "Prompt: 昨天的明天是周四，明天的昨天是周几？";
+        
+        const noThinkLines = [
+            "Initializing MiniCPM5-1B pipeline...",
+            "Context window bounded at 2048 tokens.",
+            "Loading base weights (dense 1.08B)... Done.",
+            "[TTFT] First token generated in 82ms.",
+            "Output: 明天的昨天就是今天。既然昨天的明天（也就是今天）是周四，那么明天的昨天依然是周四。",
+            "STATUS: SUCCESS // Process finished in 1.48s."
+        ];
+
+        const thinkLines = [
+            "Initializing MiniCPM5-1B pipeline...",
+            "Context window extended via native 131K template.",
+            "Loading base weights + dual-mode internal templates... Done.",
+            "[TTFT] First token generated in 94ms.",
+            "<think>",
+            "1. 拆解输入条件：'昨天的明天'。",
+            "   - 昨天的明天就是当前这一天，即'今天'。",
+            "   - 条件断言：今天 = 周四。",
+            "2. 拆解目标问题：'明天的昨天'。",
+            "   - 明天的昨天同样是指向当前这一天，即'今天'。",
+            "3. 映射逻辑链条：",
+            "   - 已知 今天 = 周四。",
+            "   - 求解 目标 = 今天 = 周四。",
+            "4. 验证是否存在语义陷阱：无。前后两概念完全等价于'今天'。",
+            "</think>",
+            "Output: 答案是周四。因为'昨天的明天'和'明天的昨天'在逻辑语义上都等同于'今天'。既然今天固定是周四，结果就不会改变。",
+            "STATUS: SUCCESS // Deep reasoning completed in 24.50s."
+        ];
+
+        function startSimulation() {
+            // 重置状态
+            document.getElementById('terminal-no-think').innerHTML = `<p class="text-zinc-500">&gt; python run_agent.py --mode fast</p><p class="text-zinc-400">${prompt}</p>`;
+            document.getElementById('terminal-think').innerHTML = `<p class="text-zinc-500">&gt; python run_agent.py --mode reasoning</p><p class="text-zinc-400">${prompt}</p>`;
+            
+            updateMetrics('no', 0.52, 1.48);
+            updateMetrics('think', 0.52, 24.5);
+
+            // 1. 模拟 Fast 模式执行 (闪电完成)
+            let noThinkIdx = 0;
+            const noThinkInterval = setInterval(() => {
+                if (noThinkIdx < noThinkLines.length) {
+                    const p = document.createElement('p');
+                    p.className = noThinkLines[noThinkIdx].startsWith('Output:') ? 'text-green-400 font-semibold' : 'text-zinc-300';
+                    p.innerText = noThinkLines[noThinkIdx];
+                    document.getElementById('terminal-no-think').appendChild(p);
+                    
+                    // Fast 模式下 VRAM 轻微上浮，时间瞬间到位
+                    if (noThinkIdx >= 3) updateMetrics('no', 0.55, 1.48);
+                    noThinkIdx++;
+                } else {
+                    clearInterval(noThinkInterval);
+                }
+            }, 300);
+
+            // 2. 模拟 Think 模式执行 (思维链拉长，显存逐步升高)
+            let thinkIdx = 0;
+            let currentVram = 0.52;
+            let currentLat = 0.1;
+
+            const thinkInterval = setInterval(() => {
+                if (thinkIdx < thinkLines.length) {
+                    const p = document.createElement('p');
+                    const line = thinkLines[thinkIdx];
+                    
+                    if (line.startsWith('<think>') || line.startsWith('</think>')) {
+                        p.className = 'text-amber-500 font-bold tracking-widest animate-pulse';
+                    } else if (line.startsWith('   -') || line.startsWith('1.') || line.startsWith('2.') || line.startsWith('3.') || line.startsWith('4.')) {
+                        p.className = 'text-zinc-500 italic pl-4';
+                    } else if (line.startsWith('Output:')) {
+                        p.className = 'text-amber-400 font-semibold';
+                    } else {
+                        p.className = 'text-zinc-300';
+                    }
+                    
+                    p.innerText = line;
+                    document.getElementById('terminal-think').appendChild(p);
+
+                    // 显存和延迟“注水式”攀升逻辑
+                    if (line.includes('1.')) { currentVram = 0.58; currentLat = 4.2; }
+                    if (line.includes('2.')) { currentVram = 0.64; currentLat = 9.8; }
+                    if (line.includes('4.')) { currentVram = 0.71; currentLat = 16.5; }
+                    if (line.startsWith('Output:')) { currentVram = 0.75; currentLat = 24.5; }
+                    
+                    updateMetrics('think', currentVram, currentLat);
+                    thinkIdx++;
+                } else {
+                    clearInterval(thinkInterval);
+                }
+            }, 500); // 故意放慢速度供视频录制展示
+        }
+
+        function updateMetrics(type, vram, latency) {
+            const maxVram = 1.5; 
+            const maxLat = 40.0;
+
+            const vramPct = (vram / maxVram) * 100;
+            const latPct = (latency / maxLat) * 100;
+
+            document.getElementById(`vram-bar-${type}`).style.height = `${vramPct}%`;
+            document.getElementById(`vram-val-${type}`).innerText = `${vram.toFixed(2)} GB`;
+
+            document.getElementById(`lat-bar-${type}`).style.height = `${latPct}%`;
+            document.getElementById(`lat-val-${type}`).innerText = `${latency.toFixed(2)} s`;
+        }
+    </script>
+</body>
+</html>
